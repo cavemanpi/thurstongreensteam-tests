@@ -29,6 +29,8 @@ public class ThurstonTests extends AutomationTest {
 	private String teacherPass  = "";
 	private String studentUser  = "";
 	private String studentPass  = "";
+	private String adminUser    = "";
+	private String adminPass    = "";
 	private String siteName     = "Thurston Green Steam";
 	private String adminPostfix = " ‹ Thurston Green Steam — WordPress";
 	private Config configuration = getClass().getAnnotation(Config.class);
@@ -150,7 +152,71 @@ public class ThurstonTests extends AutomationTest {
 					break;
 				}
 			}
+			try {
+				Thread.sleep(1500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			trashLinks = driver.findElements(By.className("submitdelete"));
+			trashIt = trashLinks.iterator();
 		}
+	}
+	
+	@Test
+	public void donateButtonExists() {
+		assertTrue(driver.getPageSource().contains("To donate to the the pond restoration, click the following"));
+		waitForElement(By.cssSelector("[href='http://www.thurstonnaturecenter.org/TNCCRestorationReport.htm']"));
+	}
+	
+	@Test
+	public void formBuilderWorks() {
+		login(adminUser, adminPass);
+		driver.get(configuration.url() + "/wp-admin/plugins.php");
+		
+		//If this does not exist, there is something wrong with the form builder.
+		waitForElement(By.cssSelector("#visual-form-builder .row-actions .deactivate"));
+		
+		//log back in as a student and insert data into an existing form
+		driver.get(configuration.url());
+		waitForWindow(siteName);
+		logout();
+		login(studentUser, studentPass);
+		driver.get(configuration.url());
+		waitForWindow(siteName);
+		
+		// Go to a form.
+		WebElement parentLink = waitForElement(By.partialLinkText("FIRST"));
+		new Actions(driver).moveToElement(parentLink).perform();
+		WebElement childLink = waitForElement(By.partialLinkText("MACRO-INVERTEBRATES"));
+		new Actions(driver).moveToElement(childLink).perform();
+		childLink.click();
+		waitForWindow("Macro-Invertebrates | Thurston Green Steam");
+		
+		WebElement studentId = waitForElement(By.cssSelector(".vfb-item-text input"));
+		studentId.sendKeys("12");
+		
+		List<WebElement> numberInputs = driver.findElements(By.cssSelector(".vfb-item-number input.digits"));
+		Iterator<WebElement> numIt = numberInputs.iterator();
+		
+		while (numIt.hasNext()){
+			WebElement numInput = numIt.next();
+			double input = Math.floor(25*Math.random());
+			numInput.sendKeys("" + (int)input);
+		}
+		
+		waitForElement(By.className("vfb-submit")).click();
+		waitForElement(By.id("form_success"));
+		
+	}
+
+	@Test
+	public void embedDocumentWorks() {
+		login(adminUser, adminPass);
+		driver.get(configuration.url() + "/wp-admin/plugins.php");
+		
+		//If this does not exist, there is something wrong with the form builder.
+		waitForElement(By.cssSelector("#embed-any-document .row-actions .deactivate"));
 	}
 
 	private void goToPosts() {
@@ -195,29 +261,19 @@ public class ThurstonTests extends AutomationTest {
 	}
 	
 	private void logout() {
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		WebElement logoutLink = waitForElement(By.partialLinkText("Log out"));
 		driver.get(logoutLink.getAttribute("href"));
-		waitForWindow("Thurston Green Steam › Log In");
+		try {
+			waitForWindow("Thurston Green Steam › Log In");
+		}
+		catch(java.lang.AssertionError e) {
+			waitForWindow(siteName);
+		}
 	}
-	
-	/*private WebDriver waitForText(String searchText) {
-
-        int attempts = 0;
-        
-        while (driver..contains(searchText)) {
-            if (attempts == MAX_ATTEMPTS) fail(String.format("Could not find %s after %d seconds",
-                                                             searchText,
-                                                             MAX_ATTEMPTS));
-            attempts++;
-            try {
-                Thread.sleep(1000); // sleep for 1 second.
-            } catch (Exception x) {
-                fail("Failed due to an exception during Thread.sleep!");
-                x.printStackTrace();
-            }
-        }
-        
-        return driver;
-	}*/
-	
 }
