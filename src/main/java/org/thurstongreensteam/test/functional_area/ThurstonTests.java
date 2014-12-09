@@ -15,8 +15,7 @@ import io.ddavison.selenium.Config;
 import static org.junit.Assert.*;
 
 @Config(
-	    //url = "http://hannah.cavemantech.net", // base url that the test launches against
-	    url = "", // base url that the test launches against
+	    url = "http://thurstongreensteam.org", // base url that the test launches against
 	    browser = Browser.CHROME, // the browser to use.
 	    hub = "" // you can specify a hub hostname / ip here.
 )
@@ -31,8 +30,8 @@ public class ThurstonTests extends AutomationTest {
 	private String studentPass  = "";
 	private String adminUser    = "";
 	private String adminPass    = "";
-	private String siteName     = "Thurston Green Steam";
-	private String adminPostfix = " ‹ Thurston Green Steam — WordPress";
+	private String siteName     = "Thurston Green STEAM";
+	private String adminPostfix = " ‹ Thurston Green STEAM — WordPress";
 	private Config configuration = getClass().getAnnotation(Config.class);
 	
 	@Test
@@ -90,7 +89,7 @@ public class ThurstonTests extends AutomationTest {
 		
 		//Creating post
 		setText("[name='post_title']", "This is my selenium test post!");
-		setText("[name='content']", "Hello World!");
+		waitForElement(By.cssSelector("#content_ifr")).sendKeys("Hello World!");
 		waitForElement(By.cssSelector("#sample-permalink"));
 		waitForElement(By.cssSelector("input#publish[value='Submit for Review']")).click();
 		//waitForText("Edit Post");
@@ -175,7 +174,7 @@ public class ThurstonTests extends AutomationTest {
 		driver.get(configuration.url() + "/wp-admin/plugins.php");
 		
 		//If this does not exist, there is something wrong with the form builder.
-		waitForElement(By.cssSelector("#visual-form-builder .row-actions .deactivate"));
+		waitForElement(By.cssSelector("#visual-form-builder-pro .row-actions .deactivate"));
 		
 		//log back in as a student and insert data into an existing form
 		driver.get(configuration.url());
